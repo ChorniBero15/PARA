@@ -37,52 +37,7 @@ int read_last_4_bits(char byte) {
 // 00000000 | 00010001 | x = "x" 
 
 void Decompress(char **data) {
-    char *compressed_string_ptr = *data;
-
-    int bytes_needed = 0;
-
-    while (*compressed_string_ptr) {
-        char marker_byte = *compressed_string_ptr;
-
-        int bytes_to_read = read_first_4_bits(marker_byte);
-
-        int bytes_to_repeat = read_last_4_bits(marker_byte);
-
-        bytes_needed += bytes_to_read * bytes_to_repeat;
-
-        compressed_string_ptr += bytes_to_read + 1;
-    }
-
-    char *decompressed_string = malloc(bytes_needed + 1);
-
-    char *current_char = decompressed_string; 
-
-    compressed_string_ptr = *data;
-
-    while (*compressed_string_ptr) {
-        char marker_byte = *compressed_string_ptr;
-
-        int bytes_to_read = read_first_4_bits(marker_byte);
-
-        int bytes_to_repeat = read_last_4_bits(marker_byte);
-
-
-        for (int i = 0; i < bytes_to_repeat; i++) {
-            for (int j = 0; j < bytes_to_read; j++) {
-                *current_char = *(compressed_string_ptr + j + 1);
-                current_char++;
-            }
-        }
-
-        // ეს გვეწერა compressed_string_ptr += bytes_to_read * bytes_to_repeat + 1;
-        // ეგ არასწორია იმიტოპმ რომ რეალურად მარკერ ბაიტებს შორის დაშორება არის bytes_to_read, აქ კი ვუმატებდით საბოლოო სტრინგში რამდენიც ჩავწერეთ მაგ რიცხვს.
-        // ეს უნდა იყოს
-        compressed_string_ptr += bytes_to_read + 1;
-    }
-    
-    *current_char = 0;
-
-    *data = decompressed_string;
+    //
 }
 
 void Test1()
