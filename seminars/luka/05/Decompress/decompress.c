@@ -3,39 +3,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-// 0100 0111
-// 00000100
-
-
-// 1111 0000
-// 1111 1111
-
-// 0-9
-// a b c d e f
-
-
-// 0x0
-int read_first_4_bits(char byte) {
-    return (byte >> 4) & 0x0f;
-}
-
-int read_last_4_bits(char byte) {
-    return byte & 0x0F;
-}
-// ptr      |pr | ptr + 2
-
-
-// compressed_string_ptr + 1 + 0
-//                      
-// 00010010 | a | 00100011 | b | c | 00010001 | x = "aabcbcbcx"
-
-
-
-
-// 0001 = 1
-// 
-// 00000000 | 00010001 | x = "x" 
-
 void Decompress(char **data) {
     //
 }
