@@ -1,7 +1,5 @@
 #include "sortedset.h"
 
-#define BASE_SIZE(elem_count, elem_size) elem_count * (elem_size + 2 * sizeof(int)) + sizeof(int)
-
 /*
 * Function: SetNew
 * Usage: SetNew(&stringSet, sizeof(char *), StringPtrCompare);
@@ -18,14 +16,7 @@ SetNew(&constellations, sizeof(pointT), DistanceCompare);
 static const int kInitialCapacity = 4;
 void SetNew(sortedset *set, int elemSize, int (*cmpfn)(const void *, const void *), void (*freefn)(const void *))
 {
-    set->allocated_length = kInitialCapacity;
-    set->elem_size = elemSize;
-    set->cmp_fn = cmpfn;
-    set->free_fn = freefn;
-    set->logical_length = 0;
-    set->base = malloc(BASE_SIZE(set->allocated_length, set->elem_size));
-    assert(set->base);
-    *(int *) set->base = -1;
+    
 }
 
 /*
@@ -41,14 +32,8 @@ printf("musta been fired");
 */
 void *SetSearch(sortedset *set, const void *elemPtr)
 {
-    int *index_ptr = FindNode(set, elemPtr);
 
-    if (*index_ptr == -1) {
-        return NULL;
-    }
 
-    void *target = (char *) set->base + sizeof(int) + (*index_ptr) * (set->elem_size + 2 * sizeof(int));
-    return target;
 }
 /*
 * Function: SetAdd
@@ -61,29 +46,7 @@ void *SetSearch(sortedset *set, const void *elemPtr)
 */
 bool SetAdd(sortedset *set, const void *elemPtr)
 {
-    int *index_ptr = FindNode(set, elemPtr);
-
-    if (*index_ptr != -1) {
-        return false;
-    }
-
-    if (set->allocated_length == set->logical_length) {
-        set->allocated_length *= 2;
-
-        set->base = realloc(set->base, BASE_SIZE(set->allocated_length, set->elem_size));
-        assert(set->base);
-    }
-
-    void *target = (char *) set->base + sizeof(int) + set->logical_length * (set->elem_size + 2 * sizeof(int));
-
-    memcpy(target, elemPtr, set->elem_size);
-
-    int *target_children = (int *) ((char *) target + set->elem_size);
     
-    target_children[0] = target_children[1] = -1;
-
-    *index_ptr = set->logical_length;
-    set->logical_length++;
 }
 
 /**
@@ -100,40 +63,7 @@ if (*ip == -1) printf("ip points where this element belongs!");
 * element to be inserted——that is, the address of the –1 that ended
 * the search.
 */
-static int *FindNode(sortedset *set, const void *elem)
-{
-
-    int *current_ptr = set->base;
-
-    while (true) {
-        int current_element_index = *current_ptr;
-
-        if (current_element_index == -1) {
-            return current_ptr;
-        }
-
-        void *current_element = 
-            ((char *) set->base + sizeof(int)) 
-            + current_element_index * (2 * sizeof(int) + set->elem_size);
-
-        int ret = set->cmp_fn(current_element, elem);
-
-        if (ret == 0) {
-            return current_ptr;
-        } else if (ret > 0) {
-            current_ptr = (int *)((char *) current_element + set->elem_size);
-        } else {
-            current_ptr = (int *)((char *) current_element + set->elem_size + sizeof(int));
-        }
-    }
-
-    //unreachable
-    assert(0);
-    return NULL;
-}
-
 void destruct(sortedset *set)
 {
-    // yvela elementze gadavlaa sachiro da freeFn-is gamodzaxeba
-    free(set->base);
+    return;
 }

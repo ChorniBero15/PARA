@@ -11,12 +11,4 @@ typedef enum
 	Nil
 } nodeType;
 
-/**
-creates a new string first + second
-*/
-char *ConcatStrings(const char *first, const char *second);
-
-/**
-recursively concats all string nodeTypes
-*/
 char *ConcatAll(nodeType *list);

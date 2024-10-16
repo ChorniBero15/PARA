@@ -16,18 +16,18 @@ int cmpfn(const void *aPtr, const void *bPtr)
 
 int main()
 {
-    // sortedset set;
-    sortedset *set = malloc(sizeof(sortedset));
+    sortedset set;
+    // sortedset *set = malloc(sizeof(sortedset));
 
-    SetNew(set, sizeof(int), &cmpfn, NULL);
+    SetNew(&set, sizeof(int), &cmpfn, NULL);
     int a = 21;
     int b = 0;
-    SetAdd(set, &a);
-    printf("Length: %d\n", set->logical_length);
-    void *result = SetSearch(set, &b);
+    SetAdd(&set, &a);
+    printf("Length: %d\n", set.logical_length);
+    void *result = SetSearch(&set, &b);
     if (result == NULL)
         printf("Elem not found \n");
 
-    int *newResult = (int *)SetSearch(set, &a);
+    int *newResult = (int *)SetSearch(&set, &a);
     printf("Element: %d\n", *newResult);
 }

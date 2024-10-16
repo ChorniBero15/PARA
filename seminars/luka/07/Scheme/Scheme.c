@@ -11,54 +11,30 @@ typedef enum
 	Nil
 } nodeType;
 
-/**
-creates a new string first + second
-*/
-char *ConcatStrings(const char *first, const char *second);
-
-/**
-recursively concats all string nodeTypes
-*/
-char *ConcatAll(nodeType *list);
-
-char *ConcatStrings(const char *first, const char *second)
-{
-    int size = 1;
-    size += strlen(first);
-    size += strlen(second);
-
-    char* head = malloc(size);
-    strcpy(head, first);
-    strcat(head, second);
-
-    return head;
-}
-
-
-
-char *ConcatAll(nodeType *list)
-{
+char *ConcatAll(nodeType *list) {
     nodeType t = *list;
 
-    if(t == Nil || t == Integer){
-        return strdup("");
+    if(t == List) {
+        list++;
+        nodeType** subLists = (nodeType**)list;
+        char* str1 = ConcatAll(subLists[0]);
+        char* str2 = ConcatAll(subLists[1]);
+
+        char* ans = malloc(strlen(str1) + strlen(str2) + 1);
+        strcpy(ans, str1);
+        strcat(ans, str2);
+
+        free(str1);
+        free(str2);
+
+        return ans;
+        
+    } else if(t == String) {
+        char* ans = (char*) ++list;
+        return strdup(ans);
+    } else {
+        return strdup("\0");
     }
-
-    if(t == String){
-        return strdup((char*)(list + 1));
-    }
-
-    nodeType **node_ptrs = (nodeType **) (list + 1);
-
-    char *first_result = ConcatAll(node_ptrs[0]);
-    char *second_result = ConcatAll(node_ptrs[1]);
-
-    char *result = ConcatStrings(first_result, second_result);
-
-    free(first_result);
-    free(second_result);
-
-    return result;
 }
 
 int main() {
