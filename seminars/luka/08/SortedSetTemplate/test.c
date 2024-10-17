@@ -23,7 +23,7 @@ int main()
     int a = 21;
     int b = 0;
     SetAdd(&set, &a);
-    printf("Length: %d\n", set.logical_length);
+    printf("Length: %d\n", set.logLength);
     void *result = SetSearch(&set, &b);
     if (result == NULL)
         printf("Elem not found \n");

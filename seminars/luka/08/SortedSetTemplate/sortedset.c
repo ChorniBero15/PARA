@@ -16,8 +16,17 @@ SetNew(&constellations, sizeof(pointT), DistanceCompare);
 static const int kInitialCapacity = 4;
 void SetNew(sortedset *set, int elemSize, int (*cmpfn)(const void *, const void *), void (*freefn)(const void *))
 {
-    
-}
+    set->base = malloc(kInitialCapacity * (elemSize + 2*sizeof(int)) + sizeof(int));
+    assert(set->base);
+
+    set->elemSize = elemSize;
+    set->allLength = kInitialCapacity;
+    set->logLength = 0;
+    set->cmpfn = cmpfn;
+    set->freefn = freefn;
+
+    *(int*)set->base = -1;
+} 
 
 /*
 * Function: SetSearch
@@ -32,8 +41,13 @@ printf("musta been fired");
 */
 void *SetSearch(sortedset *set, const void *elemPtr)
 {
+    int* indx = find(set, elemPtr);
 
+    if(*indx == -1) return NULL;
 
+    void* ans = (char*)set->base + sizeof(int) + ((*indx) * (set->elemSize + 2*sizeof(int)));
+
+    return ans;
 }
 /*
 * Function: SetAdd
@@ -46,24 +60,55 @@ void *SetSearch(sortedset *set, const void *elemPtr)
 */
 bool SetAdd(sortedset *set, const void *elemPtr)
 {
-    
+    int* indx = find(set, elemPtr);
+
+    if(*indx != -1) return false;
+
+    *indx = set->logLength;
+
+    if(set->logLength == set->allLength) {
+        set->allLength *= 2;
+
+        set->base = realloc(set->base, (sizeof(int) + set->allLength * (set->elemSize + 2*sizeof(int))));
+
+        assert(set->base);
+    }
+
+    void* newNode = (char*)set->base + sizeof(int) + set->logLength * (set->elemSize + 2*sizeof(int));
+
+    memcpy(newNode, elemPtr, set->elemSize);
+
+    newNode = (char*)newNode + set->elemSize;
+    *(int*)newNode = -1;
+    newNode = (int*)newNode + 1;
+    *(int*)newNode = -1;
+
+    set->logLength++;
+
+    return true;
 }
 
-/**
-* Function: FindNode
-* Usage: ip = FindNode(set, elem);
-*
-if (*ip == -1) printf("ip points where this element belongs!");
-* ------------------
-* FindNode descends through the underlying binary search tree of the
-* specified set and returns the address of the offset into raw storage
-* where the specified element resides. If the specified element isn't
-* in the set, FindNode returns the address of the –1 that would be updated
-* to contain the index of the element being sought if it were the
-* element to be inserted——that is, the address of the –1 that ended
-* the search.
-*/
-void destruct(sortedset *set)
-{
-    return;
+static int* find(sortedset* set, const void* elemPtr) {
+    int* curr = set->base;
+
+    while(true) {
+        if(*curr == -1) return curr;
+
+        void* currNode = (char*)set->base + sizeof(int) + ((*curr) * (set->elemSize + 2*sizeof(int)));
+
+        int res = set->cmpfn(elemPtr, currNode); // marcxniv mcire
+
+        if(res == 0) return curr;
+    
+        if(res < 0) {
+            curr = (char*)currNode + set->elemSize;
+            continue;
+        } 
+
+        curr = (char*)currNode + set->elemSize + sizeof(int);
+    }
+
+    assert(0);
+    return NULL;
 }
+
