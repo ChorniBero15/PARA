@@ -30,18 +30,34 @@ StructSum:
 #
 #   Data d;
 addi sp, sp, -9
-#   popFn(num, &d);
 
-addi sp, sp, -12
-sw ra, 8(sp)
+#   popFn(num, &d);
+addi sp, sp, -4
+sw ra, 0(sp)
+lw x10, 13(sp)
+addi sp, sp, -8
+sw x10, 0(sp)
 addi x11, sp, 12
 sw x11, 4(sp)
-lw x11, 21(sp)
-sw x11, 0(sp)
-lw x11, 25(sp)
-jalr x11 # call popFn
+lw x10, 25(sp)
+jalr x10
 lw ra, 8(sp)
 addi sp, sp, 12
+
+lb x10, 0(sp)
+addi sp, sp, 1
+lh x11, 0(sp)
+li x12, 2
+mul x11, x11, x12
+addi sp, sp, 2
+lh x13, 0(sp)
+addi sp, sp, 2
+lw x14, 0(sp)
+add x10, x10, x11
+add x10, x10, x13
+add x10, x10, x14
+addi sp, sp, 4
+ret
 
 # typedef struct {
 #   char c;        # 0 (1 byte)
@@ -49,21 +65,6 @@ addi sp, sp, 12
 #   int i;         # 5 (4 byte)
 # } Data;
 #   return d.c + d.s[0] + d.s[0] + d.s[1] + d.i;
-
-lb x11, 0(sp) # d.c
-lh x12, 1(sp) # d.s[0]
-lh x13, 3(sp) # d.s[1]
-lw x14, 5(sp) # d.i
-
-addi x15, x11, 0 # d.c
-add x15, x15, x12 # d.c + d.s[0]
-add x15, x15, x12 # d.c + d.s[0] + + d.s[0] 
-add x15, x15, x13 # d.c + d.s[0] + + d.s[0] + d.s[1]
-add x15, x15, x14 # d.c + d.s[0] + d.s[0] + d.s[1] + d.i
-
-addi x10, x15, 0
-addi sp, sp, 9
-ret
 
 #######  YOUR CODE ENDS HERE  ######
 TEST_FUNCTION:

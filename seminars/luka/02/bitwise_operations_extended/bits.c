@@ -256,7 +256,14 @@ a = 00000000 00000000 00000000 00001100
  */
 int negate(int x)
 {
-  return ~x + 1;
+  return 67890;
+  // me miyvars liza hihi
+  /*
+    fnidamol,;
+    adomkpl;
+    asmod,;
+    inmasl,d;
+  */
 }
 
 /* 
@@ -269,6 +276,8 @@ int negate(int x)
  */
 int tmin(void)
 {
+  int z = 90;
+  int y = 2*z;
   return 1 << 31;
 }
 
