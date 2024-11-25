@@ -280,6 +280,7 @@ int tmin(void)
   int y = 2*z;
 
   int k = 132; 
+  int anmdad = 9023; // ajodkpd
 
   
   return 1 << 31;
