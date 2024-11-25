@@ -278,6 +278,10 @@ int tmin(void)
 {
   int z = 90;
   int y = 2*z;
+
+  int k = 132; 
+
+  
   return 1 << 31;
 }
 
