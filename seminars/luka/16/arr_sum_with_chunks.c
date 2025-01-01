@@ -8,6 +8,7 @@
 #define NUM_THREADS 10
 #define ARR_SIZE 100000
 #define MAX_NUM 10000
+#define STEP_SIZE 10000
 
 void generateArray(int *arr) {
     int sum = 0;
@@ -18,71 +19,57 @@ void generateArray(int *arr) {
     printf("Sum of array is %d\n", sum);
 }
 
-typedef struct {
-    int *arr;
-    int *sum;
+typedef struct{
+    int* start;
 
-    int startRange;
-    int count;
-
-    sem_t *sem;
+    int* ans;
+    sem_t* sem;
 } Args;
 
-void *calculate_sum(void *args) {
-    Args *arg_ptr = (Args *)args;
+void* sum(void* arg_ptr){
+    Args arg = *(Args*)arg_ptr;
 
-    int local_sum = 0;
+    int sum = 0;
+    int* curr;
+    
+    for(int i = 0; i < STEP_SIZE; i++) {
+        curr = arg.start + i;
 
-    for (int i = 0; i < arg_ptr->count; i++) {
-        local_sum += arg_ptr->arr[arg_ptr->startRange + i];
+        sum += *curr;
     }
 
-    sem_wait(arg_ptr->sem);
-    *arg_ptr->sum += local_sum;
-    sem_post(arg_ptr->sem);
+    sem_wait(arg.sem);
+    *arg.ans += sum;
+    sem_post(arg.sem);
+
+    return NULL;
 }
 
-int main(int argc, char **argv) {
+int main() {
+    int ans = 0;
+
+    int step_size = ARR_SIZE / NUM_THREADS;
+
     int arr[ARR_SIZE];
 
     generateArray(arr);
 
-    int count = atoi(argv[1]);
-
-    printf("Thread count %d\n", count);
-
-    pthread_t *threads = malloc(sizeof(pthread_t) * count);
-    Args *args = malloc(sizeof(Args) * count);
-
-    int sum;
     sem_t sem;
-
     sem_init(&sem, 0, 1);
+    pthread_t threads[NUM_THREADS];
+    Args args[NUM_THREADS];
 
-    int per_thread_count = ARR_SIZE / count;
-
-    for (int i = 0; i < count; i++) {
-        args[i].sum = &sum;
+    for(int i = 0; i < NUM_THREADS; i++) {
+        args[i].ans = &ans;
         args[i].sem = &sem;
-        args[i].arr = arr;
-        args[i].startRange = per_thread_count * i;
-        args[i].count = per_thread_count;
+        args[i].start = (arr + i * step_size);
 
-        if (i == count - 1) {
-            args[i].count += ARR_SIZE % count;
-        }
-
-        pthread_create(&threads[i], 0, calculate_sum, &args[i]);
+        pthread_create(&threads[i], NULL, sum, &args[i]);
     }
 
-    for (int i = 0; i < count; i++) {
-        pthread_join(threads[i], 0);
-    }
+    for(int i = 0; i < NUM_THREADS; i++) pthread_join(threads[i], NULL);
 
-    free(threads);
-    free(args);
-
-    printf("Thread sum count %d\n", sum);
+    printf("%d \n", ans);
 
     return 0;
 }
