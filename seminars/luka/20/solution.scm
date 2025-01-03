@@ -1,96 +1,69 @@
 ; 1
 (define (first-elem lst)
-    (if 
-        (null? lst) 
-        "None"
-        (car lst)
-    )
+    (if (null? lst) "None"
+        (car lst))
 )
 
 ; 2
 (define (abs_ x)
-    (if 
-        (< x 0)
-        (* x -1)
-        x
-    )
+    (if (negative? x) (* x -1) 
+        x)
 )
 
 ; 3
 (define (right-triangle lst)
-    (=  
-        (+
-            (* (car lst) (car lst))
-            (* (cadr lst) (cadr lst))
-        )
-        (* (caddr lst) (caddr lst))
-    )
+    (if (= (+ (* (car lst) (car lst)) (* (cadr lst) (cadr lst))) (* (caddr lst) (caddr lst))) #t
+        #f)
 )
 
 ; 4
 (define (last-elem lst)
-    (cond 
-        ((null? lst) "None")
-        ((null? (cdr lst)) (car lst))
-        (#t (last-elem (cdr lst)))
-    )
+    (cond ((null? lst) "None")
+          ((null? (cdr lst)) (car lst))
+          (else (last-elem (cdr lst))))
 )
 
 ; 5
 (define (length_ lst)
-    (if 
-        (null? lst) 
-        0
-        (+ (length_ (cdr lst)) 1)
-    )
+    (if (null? lst) 0 
+        (+ 1 (length_ (cdr lst))))
 )
 
 ; 6
 (define (k-th-element lst k)
-    (cond
-        ((null? lst) "None")
-        ((zero? k) (car lst))
-        (#t (k-th-element (cdr lst) (- k 1)))
+    (cond ((null? lst) "None") 
+          ((= k 0) (car lst))
+          (else (k-th-element (cdr lst) (- k 1)))
     )
 )
 
 ; 7
 (define (filter-range lst a b)
-    (if 
-        (> a b) 
-        (filter-range lst b a)
-        (if
-        (null? lst) `()
-        (append (if 
-                        (and (>= (car lst) a) (<= (car lst) b)) 
-                        (list (car lst)) `()
-                    )
-                (filter-range (cdr lst) a b)
-            ) 
-        )
+    (cond ((null? lst) '())
+          ((or (and (<= (car lst) a) (>= (car lst) b)) (and (<= (car lst) b) (>= (car lst) a)))  
+          (cons (car lst) (filter-range (cdr lst) a b)))
+          (else (filter-range (cdr lst) a b))
     )
 )
 
 (define (prime_helper n k)
-    (cond
-        ((= k 1) #t)
-        ((= (remainder n k) 0) #f)
-        (#t (prime_helper n (- k 1)))
+    (cond ((= n k) #t)
+          ((zero? (modulo n k)) #f)
+          (else (prime_helper n (+ k 1)))
     )
 )
 
 ; 8
 (define (prime? n)
-    (if 
-        (< n 2) #f
-        (prime_helper n (- n 1))
+    (cond ((= n 1) #f)
+          (else (prime_helper n 2))
     )
 )
 
 ; 9 - next seminar
 (define (primes? lst)
-    (if
-        (null? lst) lst
-        (cons (prime? (car lst)) (primes? (cdr lst)))
+    (cond ((null? lst) '())
+          ((prime? (car lst)) (cons #t (primes? (cdr lst))))
+          (else (cons #f (primes? (cdr lst))))
     )
 )
