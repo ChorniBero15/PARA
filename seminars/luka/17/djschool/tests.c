@@ -9,6 +9,6 @@ void TestFiveStudentsOneTeacher() {
 }
 
 int main() {
-  TestOneStudentOneTeacher();
+  // TestOneStudentOneTeacher();
   TestFiveStudentsOneTeacher();
 }

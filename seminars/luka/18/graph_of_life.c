@@ -5,96 +5,78 @@
 #include <pthread.h>
 #include <stdlib.h>
 
-struct {
-  int num_total_threads;
-  int threads_reached;
-  int barrier_reaches; 
-  pthread_mutex_t lock;
-  pthread_cond_t cond;
-} barrier;
+int numDoneReading;
+int numDoneWriting;
+int numThreads;
+pthread_mutex_t magariLock;
+pthread_cond_t magariCond;
 
 typedef struct {
   int id;
-  int num_iterations;
-} CxovrebaArgs;
+  int numIterations;
+} Arg;
 
-void *Ckhovreba(void *args) {
-  CxovrebaArgs *margs = (CxovrebaArgs *) args;
-  
-  for (int i = 0; i < margs->num_iterations; i++) {
-    int num_n = GetNumNeighbors(margs->id);
-    int *neighbors = GetNeighbors(margs->id);
+void* func(void* arg) {
+  int id = ((Arg*)arg)->id;
+  int numIt = ((Arg*)arg)->numIterations;
 
-    int alive = 0;
-    for (int j = 0; j < num_n; j++) {
-      if (IsAlive(neighbors[j])) alive++;
-    }
+  for(int i = 0; i < numIt; i++) {
+      int numN = GetNumNeighbors(id);
+      int* nums = GetNeighbors(id);
 
-    pthread_mutex_lock(&barrier.lock);
-    barrier.threads_reached++;
+      int aliveN = 0;
 
-    if (barrier.num_total_threads == barrier.threads_reached) {
-      barrier.threads_reached = 0;
-      barrier.barrier_reaches++;
-      pthread_cond_broadcast(&barrier.cond);
-    } else {
-      int old_reach = barrier.barrier_reaches;
-      while (barrier.barrier_reaches == old_reach) {
-        pthread_cond_wait(&barrier.cond, &barrier.lock);
+      for(int i = 0; i < numN; i++) if(IsAlive(*(nums+i))) aliveN++;
+
+      pthread_mutex_lock(&magariLock);
+      numDoneReading++;
+      if(numDoneReading == numThreads) {
+        numDoneReading = 0;
+        pthread_cond_broadcast(&magariCond);
+      } else {
+        pthread_cond_wait(&magariCond, &magariLock); 
       }
-    }
 
-    pthread_mutex_unlock(&barrier.lock);
-    // barrier
+      if(aliveN == 2 || aliveN == 3) SetIsAlive(id, true);
+      else SetIsAlive(id, false);
 
-    SetIsAlive(margs->id, alive == 2 || alive == 3);
+      numDoneWriting++;
+      if(numDoneWriting == numThreads) {
+        PrintAll();
+        numDoneWriting = 0;
+        pthread_cond_broadcast(&magariCond);
+      } else pthread_cond_wait(&magariCond, &magariLock); // 
 
-    // barrier
-    pthread_mutex_lock(&barrier.lock);
-    barrier.threads_reached++;
-
-    if (barrier.num_total_threads == barrier.threads_reached) {
-      barrier.threads_reached = 0;
-      barrier.barrier_reaches++;
-      PrintAll();
-      pthread_cond_broadcast(&barrier.cond);
-    } else {
-      int old_reach = barrier.barrier_reaches;
-      while (barrier.barrier_reaches == old_reach) {
-        pthread_cond_wait(&barrier.cond, &barrier.lock);
-      }
-    }
-
-    pthread_mutex_unlock(&barrier.lock);
+      pthread_mutex_unlock(&magariLock);
   }
 
-  return 0;
+  return NULL;
 }
 
+
 void SimulateGraphOfLife(int num_nodes, int num_iterations) {
-  pthread_t *threads;
-  threads = malloc(num_nodes * sizeof(pthread_t));
+  pthread_t threads[num_nodes];
+  Arg nodeArgs[num_nodes]; 
 
-  CxovrebaArgs *args;
-  args = malloc(num_nodes * sizeof(CxovrebaArgs));
+  numThreads = num_nodes;
+  numDoneReading = 0;
+  numDoneWriting = 0;
 
-  barrier.barrier_reaches = 0;
-  barrier.num_total_threads = num_nodes;
-  pthread_mutex_init(&barrier.lock, 0);
-  pthread_cond_init(&barrier.cond, 0);
+  pthread_mutex_init(&magariLock, NULL);
+  pthread_cond_init(&magariCond, NULL);
 
-  for (int i = 0; i < num_nodes; i++) {
-    args[i].id = i;
-    args[i].num_iterations = num_iterations;
-    pthread_create(&threads[i], 0, &Ckhovreba, &args[i]); 
+  for(int i = 0; i < num_nodes; i++) { 
+    nodeArgs[i].id = i;
+    nodeArgs[i].numIterations = num_iterations;
+    pthread_create(&threads[i], NULL, func, &nodeArgs[i]);  
   }
 
-  for (int i = 0; i < num_nodes; i++) {
-    pthread_join(threads[i], 0);
+  for(int i = 0; i < num_nodes; i++) {
+    pthread_join(threads[i], NULL);
   }
 
-  free(threads);
-  free(args);
-  pthread_mutex_destroy(&barrier.lock);
-  pthread_cond_destroy(&barrier.cond);
+  pthread_mutex_destroy(&magariLock);
+  pthread_cond_destroy(&magariCond);
+
+  return;
 }

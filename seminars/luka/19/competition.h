@@ -7,19 +7,20 @@
 #include <string.h>
 #include "robot.h"
 
+#define MAX_ROBOTS 1000
+
 typedef struct {
-  int num_total_robots;
-  int robots_left;
-  bool competition_ended;
-  Robot *robots[2005];
-  Robot **rptr;
-  Robot **last_robot;
+  Robot* winner;
+  Robot* robots[MAX_ROBOTS];
 
+  bool canAddNew;
+  int numRobots;
+  int numBattles;
+  int totalRobots;
+  int totalBattles;
 
-  pthread_mutex_t lk;
-  pthread_cond_t cnd;
-  Robot *winner;
-  sem_t all_fights_finished;
+  pthread_mutex_t lock;
+  pthread_t thread;
 } Competition;
 
 // უკეთებს შეჯიბრს ინიციალიზაციას.
