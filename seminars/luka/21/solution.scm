@@ -59,7 +59,15 @@
 
 
 (define (ksubset n lst)
-	
+    (cond 
+        ((zero? n) '(()))
+        ((null? lst) '())
+        (else 
+            (append
+            (map (lambda (l) (cons (car lst) l)) (ksubset (- n 1) (cdr lst)))
+            (ksubset n (cdr lst)))
+        )
+    )
 )
 
 
